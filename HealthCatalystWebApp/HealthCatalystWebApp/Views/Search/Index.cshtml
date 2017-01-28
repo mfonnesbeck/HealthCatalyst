@@ -1,0 +1,132 @@
+﻿<style>
+	<!-- https://snippets.aktagon.com/snippets/204-How-to-display-an-animated-icon-during-Ajax-request-processing -->
+	#loading-indicator {
+		position: absolute;
+		left: 10px;
+		top: 10px;
+		z-index:+1;
+	}
+	#loading {
+		position:relative;
+		height: 100%;
+		width:100%;
+	}
+	div > img {
+		position:absolute;
+		top:0;
+		left:0;
+		right:0;
+		bottom:0;
+		margin:auto;
+	}
+    .smImg {
+        width: auto;
+        height: 50px;
+    }
+</style>
+
+<h2>Search Person</h2>
+
+<div class="row">
+    <div class="row">
+        <form action="" class="form-horizontal">
+            <!-- form-inline, puts everything on the same line -->
+            <div class="form-group">
+                <label for="username" class="control-label col-md-2">Person Search: </label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="searchName" placeholder="Please enter a first or last name to search" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-10 col-md-offset-2">
+                    <button type="button" class="btn btn-primary" id="searchPerson">Search</button>
+                </div>
+                <div id="loading"><img src="~/images/loading.gif" height="60" width="60" id="loading-indicator" style="display:none" /></div>
+            </div>
+        </form>
+    </div>
+
+    <div id="tablePanel" style="display:none" class="row">
+        <hr style="width: 80%; color: black; height: 1px; background-color:black;" />
+
+        <div class="panel panel-default panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Person Search Results</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table" id="personTable">
+                    <tr>
+                        <th>Picture</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>Age</th>
+                        <th>Address</th>
+                        <th>Interests</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="panel-footer"><span id="totalCount">0 Persons found</span></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //Click event for search button
+    $("#searchPerson").click(function (event) {
+        //Show loading wait icon - Simulating wait time
+        $('#loading-indicator').show().fadeIn();
+        //Get random "wait" time
+        var waitTime = (Math.floor(Math.random() * (10)) + 1) * 1000;
+        //Hide loading wait icon and run AJAX call to get persons
+        setTimeout("$('#loading-indicator').hide().fadeOut();populateTable()", waitTime);
+    });
+    //When the textbox recieves focus, hide table
+    $("#searchName").focus(function (event) {
+        $("#searchName").val("");
+        $("#tablePanel").hide();
+    });
+
+    //Populates table with ajax data
+    function populateTable()
+    {
+        var searchName = $("#searchName").val();
+        searchName = searchName.trim();
+        if (searchName == null) return;
+        var jsonName = JSON.stringify(searchName);
+        
+        //Send off search name to Search Controller
+        $.ajax({
+            url: '/Search/SearchPersons/' + jsonName,
+            contentType: "application/json; charset=utf-8",
+            type: 'GET',
+            data: {},
+            dataType: 'json',
+            success: function (data) {
+                $("#totalCount").text(data.length + (data.length == 0 || data.length > 1 ? " People found":" Person found"));
+                processResponse(data);
+            },
+            error: function (request, error) {
+                alert("Unfortunately there was an error in processing your request. Error: " + JSON.stringify(error) + JSON.stringify(request));
+            }
+        });
+        $('#tablePanel').show();
+    }
+
+    //Process data from AJAX call and build data table
+    function processResponse(data)
+    {
+        //A: Remove all existing data
+        $("tr:has(td)").remove();
+        //B: Add new person data
+        $.each(data, function (i, item) {
+            $('<tr>').append(
+                $('<td>').html("<img class='smImg' src='" + item.picture + "' />"),
+                $('<td>').text(item.lastName),
+                $('<td>').text(item.firstName),
+                $('<td>').text(item.age),
+                $('<td>').text(item.address),
+                $('<td>').text(item.interests)
+            ).appendTo('#personTable');
+        });
+    }
+</script>
