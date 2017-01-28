@@ -5,6 +5,10 @@ namespace HealthCatalystWebApp.Migrations
 {
     internal sealed class Configuration : DbMigrationsConfiguration<Models.PeopleContext>
     {
+        /// <summary>
+        /// Configuration constructor
+        /// Set Automatic Migrations and allow data loss to clean wipe the database each migration
+        /// </summary>
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
@@ -12,6 +16,10 @@ namespace HealthCatalystWebApp.Migrations
             ContextKey = "HealthCatalystWebApp.Models.PeopleContext";
         }
 
+        /// <summary>
+        /// Create seed data for searching
+        /// </summary>
+        /// <param name="context">Database context to save back to</param>
         protected override void Seed(Models.PeopleContext context)
         {
             //This method will be called after migrating to the latest version.

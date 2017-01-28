@@ -68,7 +68,7 @@
     </div>
 }
  
-<!-- Modal Window -->
+<!-- Modal Window to display saving success message -->
 <div class="modal fade" id="successModal">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
@@ -89,6 +89,7 @@
 @if (ViewBag.IsSaveSuccess)
 {
     <script type="text/javascript">
+        //Function to display success message popup if controller sent success flag
         $(function(){
             $("#successModal").modal('show');
         });

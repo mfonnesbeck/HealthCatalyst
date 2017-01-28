@@ -1,5 +1,5 @@
 ﻿<style>
-	<!-- https://snippets.aktagon.com/snippets/204-How-to-display-an-animated-icon-during-Ajax-request-processing -->
+	<!-- Styling for loading icon and person pictures -->
 	#loading-indicator {
 		position: absolute;
 		left: 10px;
@@ -30,7 +30,6 @@
 <div class="row">
     <div class="row">
         <form action="" class="form-horizontal">
-            <!-- form-inline, puts everything on the same line -->
             <div class="form-group">
                 <label for="username" class="control-label col-md-2">Person Search: </label>
                 <div class="col-md-10">
@@ -47,6 +46,7 @@
     </div>
 
     <div id="tablePanel" style="display:none" class="row">
+        @* Panel/table for displaying person information *@
         <hr style="width: 80%; color: black; height: 1px; background-color:black;" />
 
         <div class="panel panel-default panel-info">
@@ -78,17 +78,21 @@
         //Get random "wait" time
         var waitTime = (Math.floor(Math.random() * (10)) + 1) * 1000;
         //Hide loading wait icon and run AJAX call to get persons
-        setTimeout("$('#loading-indicator').hide().fadeOut();populateTable()", waitTime);
+        setTimeout("populateTable();$('#loading-indicator').hide().fadeOut();", waitTime);
     });
-    //When the textbox recieves focus, hide table
+
+    
+    //When the textbox recieves focus, clear prior search data
     $("#searchName").focus(function (event) {
         $("#searchName").val("");
-        $("#tablePanel").hide();
+        //I didn't like the startling look of the table disappearing
+        //$("#tablePanel").hide();
     });
 
     //Populates table with ajax data
     function populateTable()
     {
+        //Get search name/term and turn it into JSON string
         var searchName = $("#searchName").val();
         searchName = searchName.trim();
         if (searchName == null) return;
@@ -102,22 +106,25 @@
             data: {},
             dataType: 'json',
             success: function (data) {
+                //Update table count in footer and process response data
                 $("#totalCount").text(data.length + (data.length == 0 || data.length > 1 ? " People found":" Person found"));
                 processResponse(data);
             },
             error: function (request, error) {
+                //Display error message
                 alert("Unfortunately there was an error in processing your request. Error: " + JSON.stringify(error) + JSON.stringify(request));
             }
         });
+        //Finally show the table
         $('#tablePanel').show();
     }
 
     //Process data from AJAX call and build data table
     function processResponse(data)
     {
-        //A: Remove all existing data
+        //Remove all existing data
         $("tr:has(td)").remove();
-        //B: Add new person data
+        //Add new person data
         $.each(data, function (i, item) {
             $('<tr>').append(
                 $('<td>').html("<img class='smImg' src='" + item.picture + "' />"),

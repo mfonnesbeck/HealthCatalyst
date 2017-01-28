@@ -1,6 +1,9 @@
 ﻿using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using HealthCatalystWebApp.Controllers;
+using System.Collections.Generic;
+using HealthCatalystWebApp.Models;
+using Newtonsoft.Json;
 
 namespace HealthCatalystWebApp.Tests.Controllers
 {
@@ -8,100 +11,68 @@ namespace HealthCatalystWebApp.Tests.Controllers
     public class SearchControllerTest
     {
         [TestMethod]
-        public void Index()
+        public void IndexTest()
         {
-            // Arrange
+            //Arrange
             SearchController controller = new SearchController();
 
-            // Act
+            //Act
             ViewResult result = controller.Index() as ViewResult;
 
-            // Assert
+            //Assert
             Assert.IsNotNull(result);
             Assert.AreEqual("Person Search", result.ViewBag.Title);
         }
-    }
-}
-/*
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Web.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HealthCatalystWebApp;
-using HealthCatalystWebApp.Controllers;
 
-namespace HealthCatalystWebApp.Tests.Controllers
-{
-    [TestClass]
-    public class ValuesControllerTest
-    {
         [TestMethod]
-        public void Get()
+        public void SearchAllPersonsTest()
         {
-            // Arrange
-            ValuesController controller = new ValuesController();
+            //Get Search Controller
+            SearchController controller = new SearchController();
 
-            // Act
-            IEnumerable<string> result = controller.Get();
+            //Call Search Person with empty string to pull all records
+            JsonResult result = controller.SearchPersons(JsonConvert.SerializeObject(string.Empty)) as JsonResult;
 
-            // Assert
+            //Assertions, not null, and more than 0 records
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count());
-            Assert.AreEqual("value1", result.ElementAt(0));
-            Assert.AreEqual("value2", result.ElementAt(1));
+            List<PeopleModel> personList = (List<PeopleModel>)result.Data;
+            Assert.IsTrue(personList.Count > 0);
         }
 
         [TestMethod]
-        public void GetById()
+        public void SearchOnePersonsTest()
         {
-            // Arrange
-            ValuesController controller = new ValuesController();
+            //Get Search Controller
+            SearchController controller = new SearchController();
 
-            // Act
-            string result = controller.Get(5);
+            //Call Search Person with empty string to pull all records
+            JsonResult result = controller.SearchPersons(JsonConvert.SerializeObject(string.Empty)) as JsonResult;
 
-            // Assert
-            Assert.AreEqual("value", result);
+            //Save off one person in order to search for them
+            List<PeopleModel> personList = (List<PeopleModel>)result.Data;
+            PeopleModel person = personList[0];
+            result = controller.SearchPersons(JsonConvert.SerializeObject(person.lastName)) as JsonResult;
+
+            //Assertions, not null, person found, right person
+            Assert.IsNotNull(result);
+            personList = (List<PeopleModel>)result.Data;
+            Assert.IsTrue(personList.Count > 0);
+            Assert.AreEqual(personList[0].lastName, person.lastName);
         }
 
         [TestMethod]
-        public void Post()
+        public void SearchNonePersonsTest()
         {
-            // Arrange
-            ValuesController controller = new ValuesController();
+            //Get Search Controller
+            SearchController controller = new SearchController();
 
-            // Act
-            controller.Post("value");
+            //Search for something random with no results
+            JsonResult result = controller.SearchPersons(JsonConvert.SerializeObject("ASDFGHJKL!@#$%")) as JsonResult;
 
-            // Assert
-        }
-
-        [TestMethod]
-        public void Put()
-        {
-            // Arrange
-            ValuesController controller = new ValuesController();
-
-            // Act
-            controller.Put(5, "value");
-
-            // Assert
-        }
-
-        [TestMethod]
-        public void Delete()
-        {
-            // Arrange
-            ValuesController controller = new ValuesController();
-
-            // Act
-            controller.Delete(5);
-
-            // Assert
+            //Assertions, not null, no one found
+            Assert.IsNotNull(result);
+            List<PeopleModel> personList = (List<PeopleModel>)result.Data;
+            Assert.IsTrue(personList.Count == 0);
         }
     }
 }
-*/

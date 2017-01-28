@@ -9,22 +9,27 @@ namespace HealthCatalystWebApp.Controllers
 {
     public class AddController : Controller
     {
-        // GET: Add
+        /// <summary>
+        /// Default Index page for Add Person page
+        /// </summary>
+        /// <returns>Default Add Person form view</returns>
         public ActionResult Index()
         {
+            //Send in the title of the page and turned off success flag
             ViewBag.Title = "Add Person";
             ViewBag.IsSaveSuccess = false;
             return View();
         }
 
-        // POST: /Add/Index
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Postback Save Person page that saves data to database
+        /// </summary>
+        /// <param name="person">Person information from page form</param>
+        /// <returns>Default Add Person form view with success flag to raise popup</returns>
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Index([Bind(Include = "firstName,lastName,address,age,interests,picture")] PeopleModel person)
         public ActionResult Index(PeopleModel person)
         {
+            //Valid web image types
             var validImageTypes = new string[]
                 {
                     "image/gif",
@@ -34,6 +39,7 @@ namespace HealthCatalystWebApp.Controllers
                 };
 
             ViewBag.Title = "Add Person";
+            //If everything validated on the form process it
             if (ModelState.IsValid)
             {
                 //Get the image uploaded
@@ -48,24 +54,26 @@ namespace HealthCatalystWebApp.Controllers
                 }
                 else if (ImageUrl.ContentLength > 0)
                 {
-                    //Save off the file to images directory
+                    //Save off the file to images directory, with personID as filename
                     var pid = Guid.NewGuid();
                     var fileName = Path.GetFileName(ImageUrl.FileName);
                     var extension = Path.GetExtension(ImageUrl.FileName);
                     var path = Path.Combine(Server.MapPath("~/images"), pid.ToString() + extension);
                     ImageUrl.SaveAs(path);
 
-                    //Update the person object and save
+                    //Update the person object with picture filename and save
                     using (PeopleContext db = new PeopleContext())
                     {
                         person.picture = @"images/" + pid.ToString() + extension;
                         db.People.Add(person);
                         db.SaveChanges();
                     }
+                    //Send success flag to display success popup
                     ViewBag.IsSaveSuccess = true;
                     return View();
                 }
             }
+            //Failure to save, don't send the success flag, display view again
             ViewBag.IsSaveSuccess = false;
             return View();
         }
